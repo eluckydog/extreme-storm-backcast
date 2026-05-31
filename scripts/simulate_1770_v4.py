@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""1770.9 联合模拟: U(1) v4 + Carrington v2.1 (Ey polar cap saturation)"""
+"""1770.9 鑱斿悎妯℃嫙: U(1) v4 + Carrington v2.1 (Ey polar cap saturation)"""
 
 import sys, os, math
-MATH_SCIENCE = r'C:\Users\13918\.qclaw\workspace-math-science'
-sys.path.insert(0, os.path.join(MATH_SCIENCE, 'projects', 'u1-solar-modeling', 'code'))
-sys.path.insert(0, os.path.join(MATH_SCIENCE, 'projects', 'carrington-space-engine'))
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+if SCRIPT_DIR not in sys.path:
+    sys.path.insert(0, SCRIPT_DIR)
 
 from u1_solar_model_v4 import U1SolarModelV4
 from carrington.dst_model_v2 import DstEvolutionModelV2

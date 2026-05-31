@@ -1,83 +1,77 @@
 # Extreme Storm Backcast
 
-> A dual-model system that backcasts historical extreme geomagnetic storms using U(1) solar phase theory and self-consistent ring current physics.
+> 一键安装即为 Skill：clone 到 `~/.qclaw/skills/`，说句触发词就能用。
 
-## Core Insight
+## 安装为 Skill
 
-Two independently developed models — the **U(1) Solar Model** (phase-based risk assessment) and the **Carrington Space Engine** (forward Dst simulation with self-consistent saturation) — are linked together to backcast the 1770 Great East Asian Storm and other extreme events. The combined system achieves 72.7% hit rate on 11 historical extreme storms.
+```bash
+git clone https://github.com/eluckydog/extreme-storm-backcast.git ~/.qclaw/skills/extreme-storm-backcast
+```
 
-## Story (Three Chapters)
+重启 OpenClaw 会话，说以下任意触发词，Skill 自动加载：
 
-### Chapter 1: U(1) Solar Phase → Risk Windows
-The Sun's magnetic activity follows a circular phase φ(t) with period ~11 years. Extreme flares cluster at φ ≈ 142.9° (sunspot maximum), while geomagnetic storms form a dual-peak distribution: a CME-driven peak at W1 (142.9° ± 60°) and a CIR/SIR-driven Gnevyshev peak at W2 (222.0° ± 45°). Combined hit rate: 8/11 events (72.7%).
+> 「分析 1770 年极端地磁暴」「U(1) 相位风险」「Dst 模拟 Carrington」「MCMC 反演」
 
-### Chapter 2: Carrington Dst → Self-Consistent Saturation
-The Dst evolution model incorporates Ey polar cap potential saturation (Siscoe-Hill model) to resolve unphysical over-injection under extreme solar wind conditions (Ey >> 20 mV/m). A power-law decay in coupling efficiency (a_eff) enables physically motivated extrapolation to events beyond the calibration range.
+## 这是什么
 
-### Chapter 3: 1770 Event → Joint Backcast
-For the 1770.9 Great East Asian Storm (Dst ≈ −1100 ± 300 nT, MLAT 18.8°):
-- **U(1) v4 phase**: 185.7° → W1 HIGH risk (0.650)
-- **Carrington v2.1 forward**: Dst = −884 nT (2× Carrington scenario)
-- **Carrington v2.1 MCMC inversion**: Dst = −1001 nT, Bz = 112 nT (87% acceptance)
-- **Observational constraints**: Sunspot area ~6000 msh, flare energy ~10³⁴ erg, MLAT ~18.8° → all consistent
+两套独立模型联合回溯极端地磁暴：
 
-## Repository Structure
+- **U(1) 太阳模型 v4.0**：相位风险评估，双窗口（W1 黑子峰 + W2 Gnevyshev 磁暴峰），11 个历史事件命中率 **72.7%**
+- **Carrington 空间引擎 v2.1**：Dst 环电流演化，Ey 极盖电位饱和（Siscoe-Hill），正向模拟 + MCMC 反演
+- **1770 事件联合回测**：U(1) 判定 W1 HIGH → Carrington 正向 Dst=-884 nT → MCMC 反演 Dst=-1001 nT
+
+## 仓库结构 (Skill 格式)
 
 ```
 extreme-storm-backcast/
-├── README.md                  # You are here
-├── u1_model/                  # U(1) Solar Model v4.0
-│   ├── u1_solar_model_v4.py   # Core model (dual-window, Poisson, MCMC)
-│   └── tests/                 # Test suite
-├── carrington/                # Carrington Space Engine v2.1
-│   ├── carrington/            # Core package
+├── SKILL.md                        ← Skill 入口（OpenClaw 自动加载）
+├── README.md                       ← 本文件
+├── scripts/
+│   ├── u1_solar_model_v4.py        ← U(1) 太阳模型 v4.0
+│   ├── inversion_1770.py           ← 1770 MCMC 反演
+│   ├── simulate_1770_v4.py         ← 联合正向模拟
+│   ├── carrington/                 ← Carrington 空间引擎
 │   │   ├── __init__.py
-│   │   └── dst_model_v2.py    # Dst evolution with Ey saturation
-│   └── tests/                 # Test suite (23 validations)
-├── 1770_event/                # 1770 Great East Asian Storm
-│   ├── code/
-│   │   ├── inversion_1770.py  # MCMC inversion with U(1) priors
-│   │   └── simulate_1770_v4.py # Forward simulation
-│   └── data/                  # Observational constraints
-├── joint_pipeline/            # U1 → Carrington → Inversion pipeline
-├── audits/                    # Three-level audit report
-└── examples/                  # Demo notebooks
+│   │   └── dst_model_v2.py         ← Dst 演化 (Ey 饱和)
+│   └── tests/
+│       └── test_dst_v21.py         ← 23 项测试
+└── references/
+    └── audit-report_2026-05-28.md  ← 三级审计报告
 ```
 
-## Installation
+## 核心发现
 
-```bash
-pip install numpy scipy matplotlib
-```
+- 磁暴相位呈**双峰分布**：CME 驱动峰 (~150°) + CIR/SIR Gnevyshev 峰 (~222°)
+- 单窗口命中率天花板 45-55%（受物理本质限制）
+- Ey 极盖电位饱和是模拟 Dst < -750 nT 事件的必要条件
+- 1770 事件 U(1) 相位 185.7°（W1），与三条独立观测约束一致
 
-## Quick Start
+## 验证
 
-```python
-# 1. Evaluate U(1) risk for any date
-from u1_model.u1_solar_model_v4 import U1SolarModel
-model = U1SolarModel()
-risk = model.evaluate_risk(1770.9)  # → W1, HIGH, 0.650
+- ✅ 23/23 测试通过
+- ✅ 三级审计通过（门下省 K3 + 专业红队 T3-A + 工程化AI B+）
+- ✅ 334,123 耀斑事件验证（1986-2020，3 个太阳周期）
 
-# 2. Forward simulate Dst
-from carrington.dst_model_v2 import DstEvolutionModelV2
-dst_model = DstEvolutionModelV2(ey_saturation_enabled=True)
-result = dst_model.simulate(v_cme=2500, Bz_ICME=-100, n_cme=5)
+## 关键文件路径
 
-# 3. Run full backcast pipeline
-python joint_pipeline/run_joint_backcast.py --event 1770.9
-```
+| 脚本 | 功能 |
+|------|------|
+| `scripts/u1_solar_model_v4.py` | U(1) 相位模型（双窗口、Poisson、MCMC） |
+| `scripts/carrington/dst_model_v2.py` | Dst 演化（Ey 饱和、Siscoe-Hill） |
+| `scripts/inversion_1770.py` | 1770 贝叶斯反演（MCMC + U(1) 先验） |
+| `scripts/simulate_1770_v4.py` | 联合正向模拟（U1 → Carrington） |
 
-## Related Repositories
+## 关联仓库
 
-- [**u1-solar-modeling**](https://github.com/eluckydog/u1-solar-modeling) — U(1) solar phase model with 35 years of flare data
-- [**Carrington-Space-Engine**](https://github.com/eluckydog/Carrington-Space-Engine) — Self-consistent ring current Dst model
+- [u1-solar-modeling](https://github.com/eluckydog/u1-solar-modeling) — U(1) 太阳模型 + 35 年耀斑数据
+- [Carrington-Space-Engine](https://github.com/eluckydog/Carrington-Space-Engine) — Dst 环电流模型
 
-## Physics References
+## 参考文献
 
-- **U(1) Solar Phase**: von Mises circular statistics, Poisson peak-over-threshold modeling
-- **Ring Current**: Burton-McPherron-Russell Dst equation with self-consistent energy balance
-- **Saturation**: Siscoe-Hill polar cap potential saturation (Φ_PC ≤ 200 kV)
-- **1770 Event**: Kataoka & Hayakawa 2017 (Dst estimate), Hayakawa 2017 (sunspot/MSAS), Shibata 2013 (flare energy)
+- Kataoka & Hayakawa 2017: 1770 年 Dst 推估 ~-1100 nT
+- Hayakawa 2017: 太阳黑子面积 ~6000 millionths
+- Siscoe-Hill: 极盖电位饱和 (Φ_PC ≤ 200 kV)
+- Burton-McPherron-Russell: Dst 环电流方程
 
 ## License
 

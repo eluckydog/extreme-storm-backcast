@@ -75,25 +75,9 @@ PressureCorrection = None
 Atmosphere = None
 PluggableEngine = None
 
-try:
-    from .earth_environ.dipole_tilt import DipoleTilt
-except Exception as e:
-    _import_errors.append(f"dipole_tilt: {e}")
 
-try:
-    from .earth_environ.pressure_correction import PressureCorrection
-except Exception as e:
-    _import_errors.append(f"pressure_correction: {e}")
 
-try:
-    from .earth_environ.atmosphere import SimpleAtmosphere as Atmosphere
-except Exception as e:
-    _import_errors.append(f"atmosphere: {e}")
 
-try:
-    from .earth_environ.pluggable_engine import PluggableEngine
-except Exception as e:
-    _import_errors.append(f"pluggable_engine: {e}")
 
 # 导出列表
 __all__ = [

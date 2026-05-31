@@ -41,60 +41,33 @@ import numpy as np
 from dataclasses import dataclass, field
 from typing import Optional, Dict, List, Tuple
 
-# ===== 路径设置（导入依赖模型）=====
-# inversion_1770.py 位于 projects/1770-inversion-model/code/
-# MATH_SCIENCE = workspace-math-science 根目录
-CODE_DIR = os.path.dirname(os.path.abspath(__file__))
-# 从 code/ 向上3层: code/ -> 1770-inversion-model/ -> projects/ -> workspace-math-science/
-MATH_SCIENCE = os.path.abspath(os.path.join(CODE_DIR, '..', '..', '..'))
-
-# 调试：打印实际路径
-print('[DEBUG] CODE_DIR  =', CODE_DIR)
-print('[DEBUG] MATH_SCIENCE =', MATH_SCIENCE)
-print('[DEBUG] U1 target =', os.path.join(MATH_SCIENCE, 'projects', 'u1-solar-modeling', 'code'))
-
+# ===== Path setup (Skill self-contained) =====
+# All modules live under scripts/: u1_solar_model_v4.py + carrington/ + this file
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+if SCRIPT_DIR not in sys.path:
+    sys.path.insert(0, SCRIPT_DIR)
 
 def _try_import_u1():
-    """尝试导入 U1SolarModel，返回 (success, model_or_None)"""
-    # 方法1: 加入 u1-solar-modeling/code 目录
-    p1 = os.path.join(MATH_SCIENCE, 'projects', 'u1-solar-modeling', 'code')
-    if os.path.exists(p1):
-        if p1 not in sys.path:
-            sys.path.insert(0, p1)
-        try:
-            from u1_solar_model import U1SolarModel
-            m = U1SolarModel()
-            print(f'[U1] loaded from {p1}')
-            return True, m
-        except Exception as e:
-            print(f'[U1] import from {p1} failed: {e}')
-    # 方法2: 直接导入（如果已安装或在 path 中）
+    """Import U1SolarModelV4, returns (success, model_or_None)"""
     try:
-        from u1_solar_model import U1SolarModel
-        m = U1SolarModel()
-        print('[U1] loaded from existing sys.path')
+        from u1_solar_model_v4 import U1SolarModelV4
+        m = U1SolarModelV4()
+        m.load_periods()
+        print('[U1] loaded from scripts/ (v4, dual-window)')
         return True, m
-    except Exception:
-        pass
-    print('[U1] NOT loaded — U1 prior will be disabled')
-    return False, None
-
+    except Exception as e:
+        print(f'[U1] import failed: {e}')
+        return False, None
 
 def _try_import_carrington():
-    """尝试导入 DstEvolutionModelV2，返回 success"""
-    p1 = os.path.join(MATH_SCIENCE, 'projects', 'carrington-space-engine')
-    if os.path.exists(p1):
-        if p1 not in sys.path:
-            sys.path.insert(0, p1)
-        try:
-            from carrington.dst_model_v2 import DstEvolutionModelV2
-            print(f'[Carrington] loaded from {p1}')
-            return True
-        except Exception as e:
-            print(f'[Carrington] import from {p1} failed: {e}')
-    print('[Carrington] NOT loaded — will use analytic approximation')
-    return False
-
+    """Import DstEvolutionModelV2, returns success"""
+    try:
+        from carrington.dst_model_v2 import DstEvolutionModelV2
+        print('[Carrington] loaded from scripts/carrington/ (v2.1, Ey saturation)')
+        return True
+    except Exception as e:
+        print(f'[Carrington] import failed: {e}')
+        return False
 
 _success_u1, _u1_model = _try_import_u1()
 HAS_U1 = _success_u1

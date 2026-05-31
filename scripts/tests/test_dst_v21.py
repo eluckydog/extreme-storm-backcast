@@ -2,8 +2,9 @@
 """Carrington v2.1 Comprehensive Validation Suite"""
 
 import sys, os, math
-MATH_SCIENCE = r'C:\Users\13918\.qclaw\workspace-math-science'
-sys.path.insert(0, os.path.join(MATH_SCIENCE, 'projects', 'carrington-space-engine'))
+SCRIPT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if SCRIPT_DIR not in sys.path:
+    sys.path.insert(0, SCRIPT_DIR)
 from carrington.dst_model_v2 import DstEvolutionModelV2
 
 passed = 0

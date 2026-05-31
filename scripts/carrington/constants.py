@@ -1,4 +1,4 @@
-﻿"""
+"""
 轨道计算器物理常数 v1.0 — 集中管理所有物理常数
 来源: NIST 2018 / IAU 2012-2015 / NASA Planetary Fact Sheet
 

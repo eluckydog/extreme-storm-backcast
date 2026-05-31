@@ -45,8 +45,13 @@ DST_PARAMS_V2 = {
     "sat_dst_half": 1200,     # nT, 注入减半时的Dst* (绝对值)
     "sat_steepness": 600,     # nT, 过渡宽度
     
+    # --- Ey极盖电位饱和 (Siscoe-Hill, v2.1) ---
+    "ey_saturation_enabled": True,   # 默认启用：极端事件需要
+    "ey_sat_threshold": 20.0,        # mV/m, 饱和阈值
+    "ey_sat_power": 0.5,             # 幂律衰减指数
+    
     # --- 安全 ---
-    "dst_min_clamp": -2000,
+    "dst_min_clamp": -5000,
 }
 
 
